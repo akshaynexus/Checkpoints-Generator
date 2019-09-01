@@ -1,6 +1,6 @@
 //Initialize Libraries needed
 const request = require('request');
-
+//Put Explorer api link here,Iquidus is preffered atm and supported
 var explorerAPILink = "http://159.69.33.243:3001/api/";
 var blockspacing = 50000;
 //get this number from last block on explorer
