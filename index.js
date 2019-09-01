@@ -41,13 +41,10 @@ function ConvertBlockData(currblockhash,blockheight) {
     if(explorerType == "iquidus"){
     request(explorerAPILink + 'getblock?hash=' + currblockhash, {json: true}, (err, res, body) => {
         var blockheightx =  body.height;
-        var blocktime = block.time;
-        var blockbits = block.bits;
+        var blocktime = body.time;
+        var blockbits  = body.bits;
         if (fBreadwallet) {
             var hashinquotes = '"' + body.hash + '"';
-            var blocktime = body.time;
-            var blockbits = body.bits;
-            var blockheightx = body.height;
             if (blockheightx == 0 || blockheightx < currentblock) { //genesis block or after gn
                 outputdata = "{" + blockheightx + ",uint256(" + hashinquotes + "), " + blocktime + ",0x" + blockbits + "},";
             } else if (blockheightx == currentblock) { //last block in checkpoints,so dont add , at end of output data
@@ -98,7 +95,7 @@ function ConvertBlockData(currblockhash,blockheight) {
         var hashinquotes = '"' + body.hash + '"';
         var blockheightx =  body.height;
         var blocktime = new Date(body.createdAt).getTime() / 1000;//get epoch from createdAt
-        var blockbits = block.bits;
+        var blockbits  = body.bits;
         if (fBreadwallet) {
             if (body.height == 0 || body.height < currentblock) { //genesis block or after gn
                 outputdata = "{" + body.height + ",uint256(" + hashinquotes + "), " + timeEpoch + ",0x" + blockbits + "},";
@@ -148,8 +145,8 @@ function ConvertBlockData(currblockhash,blockheight) {
     request(explorerAPILink + '/block/' + blockheight, {json: true}, (err, res, body) => {
      var hashinquotes = '"' + body.hash + '"';
      var blockheightx =  body.height;
-     var blocktime = block.time;
-     var blockbits = block.bits;
+     var blocktime = body.time;
+     var blockbits  = body.bits;
      if (fBreadwallet) {
         if (blockheightx == 0 || blockheightx < currentblock) { //genesis block or after gn
             outputdata = "{" + blockheightx + ",uint256(" + hashinquotes + "), " + blocktime + ",0x" + blockbits + "},";
