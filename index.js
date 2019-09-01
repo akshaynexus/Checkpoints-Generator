@@ -40,27 +40,33 @@ function ConvertBlockData(currblockhash,blockheight) {
     var outputdata = ""
     if(explorerType == "iquidus"){
     request(explorerAPILink + 'getblock?hash=' + currblockhash, {json: true}, (err, res, body) => {
+        var blockheightx =  body.height;
+        var blocktime = block.time;
+        var blockbits = block.bits;
         if (fBreadwallet) {
             var hashinquotes = '"' + body.hash + '"';
-            if (body.height == 0 || body.height < currentblock) { //genesis block or after gn
-                outputdata = "{" + body.height + ",uint256(" + hashinquotes + "), " + body.time + ",0x" + body.bits + "},";
-            } else if (body.height == currentblock) { //last block in checkpoints,so dont add , at end of output data
-                outputdata = "{" + body.height + ",uint256(" + hashinquotes + "), " + body.time + ",0x" + body.bits + "}";
+            var blocktime = body.time;
+            var blockbits = body.bits;
+            var blockheightx = body.height;
+            if (blockheightx == 0 || blockheightx < currentblock) { //genesis block or after gn
+                outputdata = "{" + blockheightx + ",uint256(" + hashinquotes + "), " + blocktime + ",0x" + blockbits + "},";
+            } else if (blockheightx == currentblock) { //last block in checkpoints,so dont add , at end of output data
+                outputdata = "{" + blockheightx + ",uint256(" + hashinquotes + "), " + blocktime + ",0x" + blockbits + "}";
             }
             console.log(outputdata)
         } else if (fisPIVXFork) {
             var hashinquotes = '"0x' + body.hash + '"';
-            if (body.height == 0) { //genesis block
+            if (blockheightx == 0) { //genesis block
                 outputdata = "static Checkpoints::MapCheckpoints mapCheckpoints = \n";
                 outputdata += "boost::assign::map_list_of\n";
-                outputdata += "(" + body.height + ",uint256(" + hashinquotes + "))";
-            } else if (body.height < currentblock && body.height > 0) {
-                outputdata = "(" + body.height + ",uint256(" + hashinquotes + "))";
-            } else if (body.height == currentblock) { //last block in checkpoints,so dont add , at end of output data
-                outputdata = "(" + body.height + ",uint256(" + hashinquotes + "));\n";
+                outputdata += "(" + blockheightx + ",uint256(" + hashinquotes + "))";
+            } else if (blockheightx < currentblock && blockheightx > 0) {
+                outputdata = "(" + blockheightx + ",uint256(" + hashinquotes + "))";
+            } else if (blockheightx == currentblock) { //last block in checkpoints,so dont add , at end of output data
+                outputdata = "(" + blockheightx + ",uint256(" + hashinquotes + "));\n";
                 outputdata += "static const Checkpoints::CCheckpointData data = {"
                          +"\n&mapCheckpoints,\n" 
-                         +body.time + ",// * UNIX timestamp of last checkpoint block\n" 
+                         +blocktime + ",// * UNIX timestamp of last checkpoint block\n" 
                          +totaltx+",    // * total number of transactions between genesis and last checkpoint\n" +
                          "              //   (the tx=... number in the SetBestChain debug.log lines)\n" + 
                          2000 + "       // * estimated number of transactions per day after checkpoint\n};";
@@ -69,15 +75,15 @@ function ConvertBlockData(currblockhash,blockheight) {
         }
         else if (fisEnergiFork) {
             var hashinquotes = '"0x' + body.hash + '"';
-            if (body.height == 0) { //genesis block
+            if (blockheightx == 0) { //genesis block
                 outputdata = "        checkpointData = {" +
-                "\n{\n{"+body.height+",uint256S("+hashinquotes+")},\n";
-            } else if (body.height < currentblock && body.height > 0) {
-               outputdata = "{"+body.height+",uint256S("+hashinquotes+")},\n";
-            } else if (body.height == currentblock) { //last block in checkpoints,so dont add , at end of output data
-               outputdata = "{"+body.height+",uint256S("+hashinquotes+")}\n}\n};\n";
+                "\n{\n{"+blockheightx+",uint256S("+hashinquotes+")},\n";
+            } else if (blockheightx < currentblock && blockheightx > 0) {
+               outputdata = "{"+blockheightx+",uint256S("+hashinquotes+")},\n";
+            } else if (blockheightx == currentblock) { //last block in checkpoints,so dont add , at end of output data
+               outputdata = "{"+blockheightx+",uint256S("+hashinquotes+")}\n}\n};\n";
                outputdata += "\nchainTxData = ChainTxData{\n"
-               +body.time + ",// * UNIX timestamp of last checkpoint block\n" 
+               +blocktime + ",// * UNIX timestamp of last checkpoint block\n" 
                          +totaltx+",    // * total number of transactions between genesis and last checkpoint\n" +
                          "              //   (the tx=... number in the SetBestChain debug.log lines)\n" + 
                          2000 + "       // * estimated number of transactions per day after checkpoint\n};";
@@ -88,27 +94,30 @@ function ConvertBlockData(currblockhash,blockheight) {
 }
     else if(explorerType == "bulwark"){
        request(explorerAPILink + '/block/' + blockheight, {json: true}, (err, res, body) => {
+
         var hashinquotes = '"' + body.hash + '"';
-        var timeEpoch = new Date(body.createdAt).getTime() / 1000;//get epoch from createdAt
+        var blockheightx =  body.height;
+        var blocktime = new Date(body.createdAt).getTime() / 1000;//get epoch from createdAt
+        var blockbits = block.bits;
         if (fBreadwallet) {
             if (body.height == 0 || body.height < currentblock) { //genesis block or after gn
-                outputdata = "{" + body.height + ",uint256(" + hashinquotes + "), " + timeEpoch + ",0x" + body.bits + "},";
+                outputdata = "{" + body.height + ",uint256(" + hashinquotes + "), " + timeEpoch + ",0x" + blockbits + "},";
             } else if (body.height == currentblock) { //last block in checkpoints,so dont add , at end of output data
-                outputdata = "{" + body.height + ",uint256(" + hashinquotes + "), " + timeEpoch + ",0x" + body.bits + "}";
+                outputdata = "{" + body.height + ",uint256(" + hashinquotes + "), " + timeEpoch + ",0x" + blockbits + "}";
             }
             console.log(outputdata)
         } else if (fisPIVXFork) {
-            if (body.height == 0) { //genesis block
+            if (blockheightx == 0) { //genesis block
                 outputdata = "static Checkpoints::MapCheckpoints mapCheckpoints = \n";
                 outputdata += "boost::assign::map_list_of\n";
-                outputdata += "(" + body.height + ",uint256(" + hashinquotes + "))";
-            } else if (body.height < currentblock && body.height > 0) {
-                outputdata = "(" + body.height + ",uint256(" + hashinquotes + "))";
-            } else if (body.height == currentblock) { //last block in checkpoints,so dont add , at end of output data
-                outputdata = "(" + body.height + ",uint256(" + hashinquotes + "));\n";
+                outputdata += "(" + blockheightx + ",uint256(" + hashinquotes + "))";
+            } else if (blockheightx < currentblock && blockheightx > 0) {
+                outputdata = "(" + blockheightx + ",uint256(" + hashinquotes + "))";
+            } else if (blockheightx == currentblock) { //last block in checkpoints,so dont add , at end of output data
+                outputdata = "(" + blockheightx + ",uint256(" + hashinquotes + "));\n";
                 outputdata += "static const Checkpoints::CCheckpointData data = {"
                          +"\n&mapCheckpoints,\n" 
-                         +timeEpoch + ",// * UNIX timestamp of last checkpoint block\n" 
+                         +blocktime + ",// * UNIX timestamp of last checkpoint block\n" 
                          +totaltx+",    // * total number of transactions between genesis and last checkpoint\n" +
                          "              //   (the tx=... number in the SetBestChain debug.log lines)\n" + 
                          2000 + "       // * estimated number of transactions per day after checkpoint\n};";
@@ -116,14 +125,14 @@ function ConvertBlockData(currblockhash,blockheight) {
             console.log(outputdata)
         }
         else if (fisEnergiFork) {
-            var hashinquotes = '"0x' + body.hash + '"';
-            if (body.height == 0) { //genesis block
+             hashinquotes = '"0x' + body.hash + '"';
+            if (blockheightx == 0) { //genesis block
                 outputdata = "        checkpointData = {" +
-                "\n{\n{"+body.height+",uint256S("+hashinquotes+")},\n";
-            } else if (body.height < currentblock && body.height > 0) {
-               outputdata = "{"+body.height+",uint256S("+hashinquotes+")},\n";
-            } else if (body.height == currentblock) { //last block in checkpoints,so dont add , at end of output data
-               outputdata = "{"+body.height+",uint256S("+hashinquotes+")}\n}\n};\n";
+                "\n{\n{"+blockheightx+",uint256S("+hashinquotes+")},\n";
+            } else if (blockheightx < currentblock && blockheightx > 0) {
+               outputdata = "{"+blockheightx+",uint256S("+hashinquotes+")},\n";
+            } else if (blockheightx == currentblock) { //last block in checkpoints,so dont add , at end of output data
+               outputdata = "{"+blockheightx+",uint256S("+hashinquotes+")}\n}\n};\n";
                outputdata += "\nchainTxData = ChainTxData{\n"
                +timeEpoch + ",// * UNIX timestamp of last checkpoint block\n" 
                          +totaltx+",    // * total number of transactions between genesis and last checkpoint\n" +
@@ -138,43 +147,45 @@ function ConvertBlockData(currblockhash,blockheight) {
   else if(explorerType == "blockbook"){
     request(explorerAPILink + '/block/' + blockheight, {json: true}, (err, res, body) => {
      var hashinquotes = '"' + body.hash + '"';
-     var timeEpoch = body.time;
+     var blockheightx =  body.height;
+     var blocktime = block.time;
+     var blockbits = block.bits;
      if (fBreadwallet) {
-         if (body.height == 0 || body.height < currentblock) { //genesis block or after gn
-             outputdata = "{" + body.height + ",uint256(" + hashinquotes + "), " + timeEpoch + ",0x" + body.bits + "},";
-         } else if (body.height == currentblock) { //last block in checkpoints,so dont add , at end of output data
-             outputdata = "{" + body.height + ",uint256(" + hashinquotes + "), " + timeEpoch + ",0x" + body.bits + "}";
-         }
-         console.log(outputdata)
-     } else if (fisPIVXFork) {
-         if (body.height == 0) { //genesis block
-             outputdata = "static Checkpoints::MapCheckpoints mapCheckpoints = \n";
-             outputdata += "boost::assign::map_list_of\n";
-             outputdata += "(" + body.height + ",uint256(" + hashinquotes + "))";
-         } else if (body.height < currentblock && body.height > 0) {
-             outputdata = "(" + body.height + ",uint256(" + hashinquotes + "))";
-         } else if (body.height == currentblock) { //last block in checkpoints,so dont add , at end of output data
-             outputdata = "(" + body.height + ",uint256(" + hashinquotes + "));\n";
-             outputdata += "static const Checkpoints::CCheckpointData data = {"
-                      +"\n&mapCheckpoints,\n" 
-                      +timeEpoch + ",// * UNIX timestamp of last checkpoint block\n" 
-                      +totaltx+",    // * total number of transactions between genesis and last checkpoint\n" +
-                      "              //   (the tx=... number in the SetBestChain debug.log lines)\n" + 
-                      2000 + "       // * estimated number of transactions per day after checkpoint\n};";
-         }
-         console.log(outputdata)
-     }
-     else if (fisEnergiFork) {
+        if (blockheightx == 0 || blockheightx < currentblock) { //genesis block or after gn
+            outputdata = "{" + blockheightx + ",uint256(" + hashinquotes + "), " + blocktime + ",0x" + blockbits + "},";
+        } else if (blockheightx == currentblock) { //last block in checkpoints,so dont add , at end of output data
+            outputdata = "{" + blockheightx + ",uint256(" + hashinquotes + "), " + blocktime + ",0x" + blockbits + "}";
+        }
+        console.log(outputdata)
+    } else if (fisPIVXFork) {
+        if (blockheightx == 0) { //genesis block
+            outputdata = "static Checkpoints::MapCheckpoints mapCheckpoints = \n";
+            outputdata += "boost::assign::map_list_of\n";
+            outputdata += "(" + blockheightx + ",uint256(" + hashinquotes + "))";
+        } else if (blockheightx < currentblock && blockheightx > 0) {
+            outputdata = "(" + blockheightx + ",uint256(" + hashinquotes + "))";
+        } else if (blockheightx == currentblock) { //last block in checkpoints,so dont add , at end of output data
+            outputdata = "(" + blockheightx + ",uint256(" + hashinquotes + "));\n";
+            outputdata += "static const Checkpoints::CCheckpointData data = {"
+                     +"\n&mapCheckpoints,\n" 
+                     +blocktime + ",// * UNIX timestamp of last checkpoint block\n" 
+                     +totaltx+",    // * total number of transactions between genesis and last checkpoint\n" +
+                     "              //   (the tx=... number in the SetBestChain debug.log lines)\n" + 
+                     2000 + "       // * estimated number of transactions per day after checkpoint\n};";
+        }
+        console.log(outputdata)
+    }
+    else if (fisEnergiFork) {
         var hashinquotes = '"0x' + body.hash + '"';
-        if (body.height == 0) { //genesis block
+        if (blockheightx == 0) { //genesis block
             outputdata = "checkpointData = {\n" +
-            "\n{\n{"+body.height+",uint256S("+hashinquotes+")},\n";
-        } else if (body.height < currentblock && body.height > 0) {
-           outputdata = "{"+body.height+",uint256S("+hashinquotes+")},\n";
-        } else if (body.height == currentblock) { //last block in checkpoints,so dont add , at end of output data
-           outputdata = "{"+body.height+",uint256S("+hashinquotes+")}\n}\n};\n";
+            "\n{\n{"+blockheightx+",uint256S("+hashinquotes+")},\n";
+        } else if (blockheightx < currentblock && blockheightx > 0) {
+           outputdata = "{"+blockheightx+",uint256S("+hashinquotes+")},\n";
+        } else if (blockheightx == currentblock) { //last block in checkpoints,so dont add , at end of output data
+           outputdata = "{"+blockheightx+",uint256S("+hashinquotes+")}\n}\n};\n";
            outputdata += "\nchainTxData = ChainTxData{\n"
-                     +timeEpoch + ",// * UNIX timestamp of last checkpoint block\n" 
+                     +blocktime + ",// * UNIX timestamp of last checkpoint block\n" 
                      +totaltx+",    // * total number of transactions between genesis and last checkpoint\n" +
                      "              //   (the tx=... number in the SetBestChain debug.log lines)\n" + 
                      2000 + "       // * estimated number of transactions per day after checkpoint\n};";
