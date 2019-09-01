@@ -7,9 +7,9 @@ var blockspacing = 50000;
 //get this number from last block on explorer
 var currentblock = 581563;
 //Set true or false depending on your requirement
-var fBreadwallet = false;
+var fBreadwallet = true;
 var fisPIVXFork = false;
-var fisEnergiFork = true;
+var fisEnergiFork = false;
 var totaltx = 123456;//get this from the tx=... number in the SetBestChain debug.log lines
 var i = 0;
 function generateCheckpoints(blockdelay, blockcountcurr) {
