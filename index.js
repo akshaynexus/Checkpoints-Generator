@@ -3,9 +3,9 @@ const request = require('request');
 //Put Explorer api link here,Iquidus is preffered atm and supported
 var explorerAPILink = "http://159.69.33.243:3001/api/";
 var explorerType = "iquidus"//Supported explorers are Iquidus,Blockbook and Bulwark atm
-var blockspacing = 50000;
+var blockspacing = 60000;
 //get this number from last block on explorer
-var currentblock = 581563;
+var currentblock = 581863;
 //Set true or false depending on your requirement
 var fBreadwallet = true;
 var fisPIVXFork = false;
@@ -37,6 +37,7 @@ function generateCheckpoints(blockdelay, blockcountcurr) {
     i += 1;
 }
 function ConvertBlockData(currblockhash,blockheight) {
+    //TODO tidy up this code and move the checkpointing only here,and the blockheight and other needed info to another function
     var outputdata = ""
     if(explorerType == "iquidus"){
     request(explorerAPILink + 'getblock?hash=' + currblockhash, {json: true}, (err, res, body) => {
