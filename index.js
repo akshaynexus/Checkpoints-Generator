@@ -76,8 +76,8 @@ function ConvertBlockData(currblockhash,blockheight) {
                outputdata = "{"+body.height+",uint256S("+hashinquotes+")},\n";
             } else if (body.height == currentblock) { //last block in checkpoints,so dont add , at end of output data
                outputdata = "{"+body.height+",uint256S("+hashinquotes+")}\n}\n};\n";
-               outputdata += "chainTxData = ChainTxData{\n"
-                         +body.time + ",// * UNIX timestamp of last checkpoint block\n" 
+               outputdata += "\nchainTxData = ChainTxData{\n"
+               +body.time + ",// * UNIX timestamp of last checkpoint block\n" 
                          +totaltx+",    // * total number of transactions between genesis and last checkpoint\n" +
                          "              //   (the tx=... number in the SetBestChain debug.log lines)\n" + 
                          2000 + "       // * estimated number of transactions per day after checkpoint\n};";
@@ -124,8 +124,8 @@ function ConvertBlockData(currblockhash,blockheight) {
                outputdata = "{"+body.height+",uint256S("+hashinquotes+")},\n";
             } else if (body.height == currentblock) { //last block in checkpoints,so dont add , at end of output data
                outputdata = "{"+body.height+",uint256S("+hashinquotes+")}\n}\n};\n";
-               outputdata += "chainTxData = ChainTxData{\n"
-                         +timeEpoch + ",// * UNIX timestamp of last checkpoint block\n" 
+               outputdata += "\nchainTxData = ChainTxData{\n"
+               +timeEpoch + ",// * UNIX timestamp of last checkpoint block\n" 
                          +totaltx+",    // * total number of transactions between genesis and last checkpoint\n" +
                          "              //   (the tx=... number in the SetBestChain debug.log lines)\n" + 
                          2000 + "       // * estimated number of transactions per day after checkpoint\n};";
@@ -173,7 +173,7 @@ function ConvertBlockData(currblockhash,blockheight) {
            outputdata = "{"+body.height+",uint256S("+hashinquotes+")},\n";
         } else if (body.height == currentblock) { //last block in checkpoints,so dont add , at end of output data
            outputdata = "{"+body.height+",uint256S("+hashinquotes+")}\n}\n};\n";
-           outputdata += "chainTxData = ChainTxData{\n"
+           outputdata += "\nchainTxData = ChainTxData{\n"
                      +timeEpoch + ",// * UNIX timestamp of last checkpoint block\n" 
                      +totaltx+",    // * total number of transactions between genesis and last checkpoint\n" +
                      "              //   (the tx=... number in the SetBestChain debug.log lines)\n" + 
