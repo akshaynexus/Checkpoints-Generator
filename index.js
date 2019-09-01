@@ -6,8 +6,9 @@ var blockspacing = 50000;
 //get this number from last block on explorer
 var currentblock = 581563;
 //Set true or false depending on your requirement
-var fBreadwallet = true;
-var fisPIVXFork = false;
+var fBreadwallet = false;
+var fisPIVXFork = true;
+var totaltx = 123456;//get this from the tx=... number in the SetBestChain debug.log lines
 var i = 0;
 function generateCheckpoints(blockdelay, blockcountcurr) {
     if (i <= blockcountcurr) {
@@ -19,6 +20,7 @@ function generateCheckpoints(blockdelay, blockcountcurr) {
             outputdatax = "";
         } else 
             i += blockdelay - 1;
+        
         //Get block hash
         request(explorerAPILink + 'getblockhash?index=' + i, {
             json: false
@@ -55,7 +57,12 @@ function ConvertBlockData(currblockhash) {
                 outputdata = "(" + body.height + ",uint256(" + hashinquotes + "))";
             } else if (body.height == currentblock) { //last block in checkpoints,so dont add , at end of output data
                 outputdata = "(" + body.height + ",uint256(" + hashinquotes + "));\n";
-                outputdata += "static const Checkpoints::CCheckpointData data = {\n&mapCheckpoints,\n" + body.time + ",\n" + body.height * 2 + ",\n" + 1440 + "};";
+                outputdata += "static const Checkpoints::CCheckpointData data = {"
+                         +"\n&mapCheckpoints,\n" 
+                         +body.time + ",// * UNIX timestamp of last checkpoint block\n" 
+                         +totaltx+",    // * total number of transactions between genesis and last checkpoint\n" +
+                         "              //   (the tx=... number in the SetBestChain debug.log lines)\n" + 
+                         2000 + "       // * estimated number of transactions per day after checkpoint\n};";
             }
             console.log(outputdata)
         }
