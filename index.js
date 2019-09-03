@@ -1,19 +1,23 @@
 //Initialize Libraries needed
 const request = require('request');
 //Put Explorer api link here,Iquidus is preffered atm and supported
-var explorerAPILink = "http://159.69.33.243:3001/api/";
-var explorerType = "iquidus"//Supported explorers are Iquidus,Blockbook and Bulwark atm
-var blockspacing = 60000;
+var explorerAPILink = "https://blockbook.quantisnetwork.org/api/";
+var explorerType = "blockbook"//Supported explorers are Iquidus,Blockbook and Bulwark atm
+var blockspacing = 10000;
 //get this number from last block on explorer
-var currentblock = 581863;
+var currentblock = 91090;
 //Set true or false depending on your requirement
-var fBreadwallet = true;
+var fBreadwallet = false;
 var fisPIVXFork = false;
-var fisEnergiFork = false;
-var totaltx = 123456;//get this from the tx=... number in the SetBestChain debug.log lines
+var fisEnergiFork = true;
+var totaltx = 195853;//get this from the tx=... number in the SetBestChain debug.log lines
 var i = 0;
+//Blockbook only requirements,genesis block is not recorded in blockbook.
+var genesishash = "0000001d161ffa384283efdba6d25be3477b60ae36c9c52d49d4edbf9a4cf35b";
+var genesisbits = "0x1e0ffff0"
+var genesistime = 1559435552;
 function generateCheckpoints(blockdelay, blockcountcurr) {
-    if (i <= blockcountcurr) {
+    if (i +1<= blockcountcurr) {
         if (i + blockdelay > blockcountcurr || i > blockcountcurr) 
             i = blockcountcurr;
         else if (i == 1) 
@@ -22,7 +26,7 @@ function generateCheckpoints(blockdelay, blockcountcurr) {
             outputdatax = "";
         } else 
             i += blockdelay - 1;
-        
+        if(explorerType != "bulwark" || explorerType != "blockbook"){
         //Get block hash
         request(explorerAPILink + 'getblockhash?index=' + i, {
             json: false
@@ -32,9 +36,15 @@ function generateCheckpoints(blockdelay, blockcountcurr) {
             ConvertBlockData(body,i);
             //Call the func in of itself,emulating a for loop type situation.
             generateCheckpoints(blockspacing, currentblock);
+
         });
+        }
+        else if(explorerType == "blockbook"){
+            ConvertBlockData(null,i);
+            //Call the func in of itself,emulating a for loop type situation.
+            generateCheckpoints(blockspacing, currentblock);
+        }
     }
-    i += 1;
 }
 function ConvertBlockData(currblockhash,blockheight) {
     //TODO tidy up this code and move the checkpointing only here,and the blockheight and other needed info to another function
@@ -143,11 +153,18 @@ function ConvertBlockData(currblockhash,blockheight) {
   }
 
   else if(explorerType == "blockbook"){
-    request(explorerAPILink + '/block/' + blockheight, {json: true}, (err, res, body) => {
+     request(explorerAPILink + 'block/' + blockheight, {json: true}, (err, res, body) => {
      var hashinquotes = '"' + body.hash + '"';
      var blockheightx =  body.height;
      var blocktime = body.time;
      var blockbits  = body.bits;
+     if(i ==0 || blockheight == 0){
+    //fill block data manually for genesis,since blockbook doesnt add data of genesis block for some reason
+     hashinquotes = '"' + genesishash + '"';
+     blockheightx = 0;
+     blocktime = genesistime;
+     blockbits = genesisbits
+    }
      if (fBreadwallet) {
         if (blockheightx == 0 || blockheightx < currentblock) { //genesis block or after gn
             outputdata = "{" + blockheightx + ",uint256(" + hashinquotes + "), " + blocktime + ",0x" + blockbits + "},";
@@ -175,13 +192,14 @@ function ConvertBlockData(currblockhash,blockheight) {
     }
     else if (fisEnergiFork) {
         var hashinquotes = '"0x' + body.hash + '"';
-        if (blockheightx == 0) { //genesis block
-            outputdata = "checkpointData = {\n" +
-            "\n{\n{"+blockheightx+",uint256S("+hashinquotes+")},\n";
+        if (blockheightx == 0 || i ==0) { //genesis block
+            hashinquotes = '"0x' + genesishash + '"';
+            outputdata = "        checkpointData = {\n" +
+            "          {\n           {"+blockheightx+",uint256S("+hashinquotes+")},";
         } else if (blockheightx < currentblock && blockheightx > 0) {
-           outputdata = "{"+blockheightx+",uint256S("+hashinquotes+")},\n";
+           outputdata = "           {"+blockheightx+",uint256S("+hashinquotes+")},";
         } else if (blockheightx == currentblock) { //last block in checkpoints,so dont add , at end of output data
-           outputdata = "{"+blockheightx+",uint256S("+hashinquotes+")}\n}\n};\n";
+           outputdata = "           {"+blockheightx+",uint256S("+hashinquotes+")}\n          }\n};\n";
            outputdata += "\nchainTxData = ChainTxData{\n"
                      +blocktime + ",// * UNIX timestamp of last checkpoint block\n" 
                      +totaltx+",    // * total number of transactions between genesis and last checkpoint\n" +
@@ -192,6 +210,6 @@ function ConvertBlockData(currblockhash,blockheight) {
     }
    });
  }
-
+++i;
 }
 generateCheckpoints(blockspacing, currentblock);
