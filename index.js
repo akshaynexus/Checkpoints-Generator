@@ -1,15 +1,15 @@
 //Initialize Libraries needed
 const request = require('request');
 //Put Explorer api link here,Iquidus is preffered atm and supported
-var explorerAPILink = "https://blockbook.quantisnetwork.org/api/";
-var explorerType = "blockbook"//Supported explorers are Iquidus,Blockbook and Bulwark atm
+var explorerAPILink = "http://explorer.lytixchain.org/api";
+var explorerType = "bulwark"//Supported explorers are Iquidus,Blockbook and Bulwark atm
 var blockspacing = 10000;
 //get this number from last block on explorer
-var currentblock = 91090;
+var currentblock = 378221;
 //Set true or false depending on your requirement
 var fBreadwallet = false;
-var fisPIVXFork = false;
-var fisEnergiFork = true;
+var fisPIVXFork = true;
+var fisEnergiFork = false;
 var totaltx = 195853;//get this from the tx=... number in the SetBestChain debug.log lines
 var i = 0;
 //Blockbook only requirements,genesis block is not recorded in blockbook.
